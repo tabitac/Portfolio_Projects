@@ -12,7 +12,7 @@ Where
   continent is not null -- Removing null rows in continent
 Order by 
   3, 
-  4 -- ordering by column 3 (location) and 4 (date)
+  4 
   
   -- Select Data that we are going to be starting with
 
@@ -29,7 +29,7 @@ Where
   continent is not null 
 Order by 
   1, 
-  2 -- order by location and date 
+  2 
   
   -- Analyzing Total Cases vs Total Deaths
   --Shows the likehood of dying if you contact covid in your country 
