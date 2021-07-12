@@ -1,5 +1,11 @@
-Select 
-  * -- Select all 
+/*
+Covid 19 Data Exploration
+
+Skills used in this project: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Tyoes
+*/
+
+
+Select * 
 From 
   [Portfolio ]..Covid_Deaths -- delclare that we are selecting Covid Deaths table
 Where 
@@ -7,10 +13,9 @@ Where
 Order by 
   3, 
   4 -- ordering by column 3 (location) and 4 (date)
-  --Select *
-  --From [Portfolio ]..Covid_Vaccinations
-  --Order by 3,4 
-  --Select Data that we will be using 
+  
+  -- Select Data that we are going to be starting with
+
 Select 
   location, 
   date, 
@@ -19,12 +24,13 @@ Select
   total_deaths, 
   population 
 From 
-  [Portfolio ]..Covid_Deaths -- delclare that we are selecting Covid Deaths table
+  [Portfolio ]..Covid_Deaths 
 Where 
-  continent is not null -- Removing null rows in continent
+  continent is not null 
 Order by 
   1, 
   2 -- order by location and date 
+  
   -- Analyzing Total Cases vs Total Deaths
   --Shows the likehood of dying if you contact covid in your country 
 Select 
@@ -40,8 +46,10 @@ Where
   and continent is not null -- Removing null rows in continent
 Order by 
   1, 
-  2 --Analyzing the total cases vs Population
-  --Shows what percentage of population got affected by Covid 
+  2 
+  
+  --Analyzing Total cases vs Population
+  --Shows what percentage of population infected by Covid 
 Select 
   location, 
   date, 
@@ -52,8 +60,9 @@ From
   [Portfolio ]..Covid_Deaths --Where location like '%Canada%'
 Order by 
   1, 
-  2 --
-  --Shows Countries with Highest Infection Rate compared to Population 
+  2 
+  
+--Shows Countries with Highest Infection Rate compared to Population 
 Select 
   location, 
   population, 
@@ -69,7 +78,10 @@ Group by
   location, 
   population 
 Order by 
-  PercentagePopulationInfected desc --Shows Countries with the Highest Death Count per Population
+  PercentagePopulationInfected desc
+  
+  --Shows Countries with the Highest Death Count per Population
+  
 Select 
   location, 
   MAX(
@@ -82,7 +94,9 @@ Where
 Group by 
   location 
 Order by 
-  TotalDeathCount desc --- - Breakdown : Highest Death Count by Continent
+  TotalDeathCount desc 
+  
+  -- Breakdown : Highest Death Count by Continent
   --Showing continents with the highest death count per population 
 Select 
   continent, 
@@ -96,7 +110,10 @@ Where
 Group by 
   continent 
 Order by 
-  TotalDeathCount desc -- Global numbers
+  TotalDeathCount desc 
+  
+  
+  -- Global Numbers
 Select 
   SUM(new_cases) as Total_Cases, 
   SUM(
@@ -111,18 +128,10 @@ Where
   continent is not null --Group by date
 Order by 
   1, 
-  2 -- Vaccinations Table 
-Select 
-  * 
-From 
-  [Portfolio ]..Covid_Vaccinations -- Join Covid death and vacation table by location and date 
-Select 
-  * 
-From 
-  [Portfolio ]..Covid_Deaths dea -- dea = key name for Covid_Deaths tables
-  Join [Portfolio ]..Covid_Vaccinations vac -- vac = key name for Covid_Vaccinations 
-  ON dea.location = vac.location 
-  and dea.date = vac.date --Looking at Total Population vs Vaccinations 
+  2 
+  
+  -- Joining Death and Vaccinations Table 
+
 Select 
   dea.continent, 
   dea.location, 
@@ -130,8 +139,8 @@ Select
   dea.population, 
   vac.new_vaccinations 
 From 
-  [Portfolio ]..Covid_Deaths dea -- dea = key name for Covid_Deaths tables
-  Join [Portfolio ]..Covid_Vaccinations vac -- vac = key name for Covid_Vaccinations 
+  [Portfolio ]..Covid_Deaths dea 
+  Join [Portfolio ]..Covid_Vaccinations vac  
   ON dea.location = vac.location 
   and dea.date = vac.date 
 Where 
@@ -139,6 +148,10 @@ Where
 Order by 
   2, 
   3 
+  
+    
+  -- Total Population vs Vaccinations
+  -- Shows Percentage of Population that has received at least first dose of Covid Vaccine
 Select 
   dea.continent, 
   dea.location, 
@@ -152,7 +165,7 @@ Select
     Order by 
       dea.location, 
       dea.date
-  ) as RollingCount_PeopleVaccinated --breaking it up by location , example : query will run only through Canada when it gets through the next country it doen't keep going
+  ) as RollingCount_PeopleVaccinated   --Breaking it  by location , example : query will run only through Canada when it gets through the next country it doen't keep going
 From 
   [Portfolio ]..Covid_Deaths dea -- dea = key name for Covid_Deaths tables
   Join [Portfolio ]..Covid_Vaccinations vac -- vac = key name for Covid_Vaccinations 
@@ -162,7 +175,10 @@ Where
   dea.continent is not null 
 Order by 
   2, 
-  3 -- Using CTE to perform Calculation on Partition By in previous query
+  3 
+  
+  -- Using CTE to perform Calculation on Partition By in previous query
+  
   With PopvsVac (
     continent, location, date, population, 
     new_vaccinations, RollingCount_PeopleVaccinated
@@ -187,15 +203,20 @@ Order by
       ON dea.location = vac.location 
       and dea.date = vac.date 
     Where 
-      dea.continent is not null --Order by 2,3 -- Order by clause can't be in here - "commnent out"
+      dea.continent is not null
+      --Order by 2,3 -- Order by clause can't be used , will cause error  - "commnent out"
       ) 
+      
 Select 
   *, 
   (
     RollingCount_PeopleVaccinated / population
   )* 100 as PercentageofRollingCount_PeopleVaccinated 
 From 
-  PopvsVac -- Temp Table Version 
+  PopvsVac 
+  
+    
+ -- Using Temp Table Version to perform Calculation on Partition by in previous query
 Drop 
   Table if exists #PercentPopulationVaccinated
   Create Table #PercentPopulationVaccinated
@@ -206,7 +227,8 @@ Drop
     Population numeric, 
     New_vaccination numeric, 
     RollingCount_PeopleVaccinated numeric
-  ) Insert into #PercentPopulationVaccinated
+  ) 
+Insert into #PercentPopulationVaccinated
 Select 
   dea.continent, 
   dea.location, 
@@ -223,18 +245,22 @@ Select
   ) as RollingCount_PeopleVaccinated --breaking it up by location , example : query will run only through Canada when it gets through the next country it doen't keep going
 From 
   [Portfolio ]..Covid_Deaths dea 
-  Join [Portfolio ]..Covid_Vaccinations vac ON dea.location = vac.location 
+  Join [Portfolio ]..Covid_Vaccinations vac 
+  ON dea.location = vac.location 
   and dea.date = vac.date 
 Where 
-  dea.continent is not null --Order by 2,3 
-Select 
+  dea.continent is not null 
+  --Order by 2,3 
+  Select 
   *, 
   (
     RollingCount_PeopleVaccinated / population
   )* 100 as PercentageofRollingCount_PeopleVaccinated 
 From 
   #PercentPopulationVaccinated
-  --Creating Views to store data for later visulizations 
+  
+   --Creating Views to store data for later visulizations 
+   -- Percent Population Vaccinate View
   Use [Portfolio ] GO 
 SET 
   Ansi_nulls on GO Create View PercentPopulationVaccinate as 
@@ -258,7 +284,10 @@ From
   and dea.date = vac.date 
 where 
   dea.continent is not null
-) GO Create View TotalPopvsVac as 
+) GO 
+-- View of Total Population VS Vaccinations
+
+Create View TotalPopvsVac as 
 Select 
   dea.continent, 
   dea.location, 
@@ -272,7 +301,8 @@ From
   and dea.date = vac.date 
 Where 
   dea.continent is not null --Order by 2,3
-  -- Global numbers
+  
+  -- View of Global numbers
   Create View Globalno as 
 Select 
   SUM(new_cases) as Total_Cases, 
@@ -285,7 +315,9 @@ Select
 From 
   [Portfolio ]..Covid_Deaths 
 Where 
-  continent is not null --Shows Countries with the Highest Death Count per Population
+  continent is not null -
+  
+  - View shows Countries with the Highest Death Count per Population
   Create View Highdeathcount_pop as 
 Select 
   location, 
@@ -298,7 +330,8 @@ Where
   continent is not null 
 Group by 
   location --Order by TotalDeathCount desc
-  --Shows the likehood of dying if you contact covid in your country 
+  
+  --View shows the likehood of dying if you contact covid in Canada
   Create View Canada_covid as 
 Select 
   location, 
